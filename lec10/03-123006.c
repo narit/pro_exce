@@ -5,14 +5,8 @@
  */
 
 #include <stdio.h>
-#include <ctype.h>  // isspace()のため
 #include <stdlib.h> // malloc()のため
-#include <string.h> // strcmp()のため
 
-#define S_SPACE 0
-#define S_WORD 1
-
-#define WRD_LEN 32              // 最大文字数
 #define FILE_NAME "numbers.txt"    // 開くファイル
 
 /* 構造体の定義 */
@@ -44,7 +38,9 @@ int main(void)
     while (fscanf(fp, "%d", &num) != EOF)
         insert_tree(num);
     
-    show_tree(&root);
+    fclose(fp);
+    
+    show_tree(&root);   // 表示
     
     free_tree(&root);   // 木の解放
 
@@ -62,8 +58,7 @@ int insert_tree(int num)
     if(p->left == &root || p->right == &root)
     {
         p->number = num;
-        p->left = NULL;
-        p->right = NULL;
+        p->left = p->right = NULL;
         return 1;
     }
     
@@ -108,8 +103,7 @@ int insert_tree(int num)
     
     // 登録済みでないなら新しい節にデータを登録
     new->number = num;
-    new->left = NULL;
-    new->right = NULL;
+    new->left = new->right = NULL;
     return 1;
 }
 
