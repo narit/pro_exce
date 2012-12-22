@@ -72,6 +72,8 @@ int main(void)
         }
     }
     
+    free(fp);
+    
     //show_tree(&root);
     
     find_max(&root);    // 最大頻度単語を探す

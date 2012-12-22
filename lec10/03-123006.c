@@ -15,10 +15,9 @@ typedef struct tree {
     struct tree *left;
     struct tree *right;
 } TREE;
-TREE root = {0, &root, &root};  // root
 
 /* 関数のプロトタイプ宣言 START */
-int insert_tree(int num);
+int insert_tree(TREE *p, int num);
 void show_tree(TREE *p);
 void free_tree(TREE *p);
 /* 関数のプロトタイプ宣言 END */
@@ -26,6 +25,7 @@ void free_tree(TREE *p);
 int main(void)
 {
     FILE *fp;       // ファイルポインタ
+    TREE root = {0, &root, &root};  // root
     int num;
     
     if ((fp = fopen(FILE_NAME, "r")) == NULL)
@@ -36,7 +36,7 @@ int main(void)
     
     // 終わりまで1つずつ取り込む
     while (fscanf(fp, "%d", &num) != EOF)
-        insert_tree(num);
+        insert_tree(&root, num);
     
     fclose(fp);
     
@@ -48,14 +48,14 @@ int main(void)
 }
 
 /* 木に要素を追加する関数 */
-int insert_tree(int num)
+int insert_tree(TREE *root, int num)
 {
     TREE *p, *new;
     
-    p = &root; // ルートの番地を格納
+    p = root; // ルートの番地を格納
     
     // 最初ならデータをそのまま格納
-    if(p->left == &root || p->right == &root)
+    if(p->left == root || p->right == root)
     {
         p->number = num;
         p->left = p->right = NULL;
@@ -94,7 +94,7 @@ int insert_tree(int num)
         }
     }
     
-    // 登録済みなら終わり
+    // 登録済みなら登録しないで終わり
     if(p->number == num)
     {
         free(new);
@@ -107,7 +107,7 @@ int insert_tree(int num)
     return 1;
 }
 
-/* 木の内容を表示する関数(帰りがけ順なので昇順になる) */
+/* 木の内容を表示する関数(通りがけ順なので昇順になる) */
 void show_tree(TREE *p)
 {
     // 左へ
