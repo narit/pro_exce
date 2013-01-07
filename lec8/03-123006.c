@@ -72,7 +72,7 @@ int main(void)
         }
     }
     
-    free(fp);
+    fclose(fp);
     
     //show_tree(&root);
     
