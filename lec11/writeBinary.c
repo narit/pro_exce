@@ -12,6 +12,8 @@
 #define FILE_NAME "points.bin"    // 開くファイル
 #define POINT_NUM 1000  // 点の数
 
+//#define DEBUG
+
 /* 構造体の定義 */
 typedef struct _xy {
     double x;
@@ -22,12 +24,16 @@ XY gen_point(void)
 {
     XY tmp;
     
-    // [-√3, √3]の座標を得る
-    tmp.x = ((rand() % 2) ? 1 : -1) * sqrt(3.0 * (double)rand() / RAND_MAX);
+    double rad = 2.0 * M_PI * (double)rand() / RAND_MAX;
     
-    // xに合わせてyを計算
-    tmp.y = ((rand() % 2) ? 1 : -1) * sqrt((1.0 - tmp.x * tmp.x / 3.0) * 5.0);
+    // 三角関数を用いて座標を得る
+    tmp.x = sqrt(3.0) * cos(rad);
+    tmp.y = sqrt(5.0) * sin(rad);
     
+#ifdef DEBUG
+    printf("x = %+f, y = %+f, cal = %+f\n", tmp.x, tmp.y,
+           tmp.x * tmp.x / 3.0 + tmp.y * tmp.y / 5.0);
+#endif
     return tmp;
 }
 
