@@ -24,8 +24,8 @@ int main(void)
     }
     
     // 後ろから少しずつずらす
-    // 先頭まで来たら戻せなくなるので-1がかえる
-    for (i = 1; fseek(fp, - i * sizeof(c), SEEK_END) != -1; i++)
+    // 先頭まで来たら戻せなくなるので0以外がかえる
+    for (i = 1; fseek(fp, - i * sizeof(c), SEEK_END) == 0; i++)
     {
         fread(&c, sizeof(c), 1, fp);    // 読み出し
         putchar(c);
