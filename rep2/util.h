@@ -18,4 +18,10 @@ void set_character(char **str, char c, int *len, int *max);
  */
 char *read_input(void);
 
+/**
+ * 入力をint型として読み込む関数
+ * @return int * 読み込んだ整数
+ */
+int read_input_as_int(void);
+
 #endif

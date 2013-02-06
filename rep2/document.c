@@ -14,7 +14,7 @@ void insert_document(char *str)
     // ドキュメント格納配列の大きさが足りないとき
     if (n_docs >= n_docs_max)
     {
-        n_docs_max += DOCUMENT_SIZE_UNIT; // 少し大きくする
+        n_docs_max *= 2; // 倍の大きさにする
         // メモリを再度割り当てる
         if ((tmp = (char **)realloc(document, sizeof(char *) * n_docs_max)) == NULL)
         {

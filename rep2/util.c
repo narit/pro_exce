@@ -68,3 +68,18 @@ char *read_input(void)
     
     return input;   // 取得文字列を返す
 }
+
+/**
+ * 入力をint型として読み込む関数
+ * @return int * 読み込んだ整数
+ */
+int read_input_as_int(void)
+{
+    char *input;
+    int in;
+    
+    input = read_input();
+    in = atoi(input);
+    free(input);
+    return in;
+}

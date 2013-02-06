@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "array.h"
-#include "sword.h"
 
 /**
  *  配列に単語を追加する
@@ -14,15 +13,15 @@ int add_array(char *str, int doc_index)
 {
     int i;
     
-    ARRAY *tmp;
+    ARRAY **tmp;
     
     // 配列の中を探す
     for (i = 0; i < n_words; i++)
     {
-        if (strcmp(words[i].word, str) == 0)
+        if (strcmp(words[i]->word, str) == 0)
         {
-            if (insert_list(&(words[i].indices), doc_index)) // 単語の出現行番号を保存
-                words[i].freq++;    // 重複がなければ出現頻度を増やす
+            if (insert_list(&(words[i]->indices), doc_index)) // 単語の出現行番号を保存
+                words[i]->freq++;    // 重複がなければ出現頻度を増やす
             return i;   // ヒットしたIDを返す
         }
     }
@@ -30,9 +29,9 @@ int add_array(char *str, int doc_index)
     // 単語の格納配列の大きさが足りないとき
     if (n_words >= n_words_max)
     {
-        n_words_max += WORD_SIZE_UNIT; // 少し大きくする
+        n_words_max *= 2; // 2倍の大きさにする
         // メモリを再度割り当てる
-        if ((tmp = (ARRAY *)realloc(words, sizeof(ARRAY) * n_words_max)) == NULL)
+        if ((tmp = (ARRAY **)realloc(words, sizeof(ARRAY *) * n_words_max)) == NULL)
         {
             printf("Memory Reallocation Error\n");
             exit(1);
@@ -44,20 +43,27 @@ int add_array(char *str, int doc_index)
     }
     
     // 新しく作成
-    words[n_words].word = (char *)malloc(sizeof(char) * (strlen(str) + 1));
-    if (words[n_words].word == NULL)
+    words[n_words] = (ARRAY *)malloc(sizeof(ARRAY));
+    if (words[n_words] == NULL)
+    {
+        printf("Memory Allocation Error\n");
+        exit(1);
+    }
+    words[n_words]->word = (char *)malloc(sizeof(char) * (strlen(str) + 1));
+    if (words[n_words]->word == NULL)
     {
         printf("Memory Allocation Error\n");
         exit(1);
     }
     // 文字列のコピー
-    memcpy(words[n_words].word, str, sizeof(char) * (strlen(str) + 1));
+    memcpy(words[n_words]->word, str, sizeof(char) * (strlen(str) + 1));
     
     // 各種値の初期化
-    words[n_words].freq = 1;
-    words[n_words].indices.next = NULL;
-    insert_list(&(words[n_words].indices), doc_index);  // 現在の行の番号を追加
-    words[n_words].second_words.next = NULL;    // 初期化
+    words[n_words]->freq = 1;
+    words[n_words]->indices.next = NULL;
+    insert_list(&(words[n_words]->indices), doc_index);  // 現在の行の番号を追加
+    words[n_words]->second_words.left = &(words[n_words]->second_words);  // 初期化
+    words[n_words]->second_words.right = &(words[n_words]->second_words); // 初期化
     
     return n_words++; // 追加した位置を返す
 }
@@ -68,13 +74,12 @@ int add_array(char *str, int doc_index)
  *  2つの単語を関連付ける関数
  *  @param int pre_word_id 一つ前の単語のID
  *  @param int cur_word_id 現在の単語のID
- *  @param char *second_word 追加する文字列
  *  @param int doc_index 現在のドキュメントのID
  *  @return int 格納できたかどうか(0:重複有り, 1:成功)
  */
-int associate_words(int pre_word_id, int cur_word_id, char *second_word, int doc_index)
+int associate_words(int pre_word_id, int cur_word_id, int doc_index)
 {
-    return insert_sword(&(words[pre_word_id].second_words), cur_word_id, second_word, doc_index);
+    return insert_tree(&(words[pre_word_id]->second_words), cur_word_id, doc_index);
 }
 
 /**
@@ -84,13 +89,11 @@ int associate_words(int pre_word_id, int cur_word_id, char *second_word, int doc
 void show_array()
 {
     int i;
-    SWORD *p;
     
     for (i = 0; i < n_words; i++)
     {
-        printf("%s ->", words[i].word);
-        for (p = words[i].second_words.next; p != NULL; p = p->next)
-            printf(" %s[%d],", p->word, p->freq);
+        printf("%s ->", words[i]->word);
+        show_tree(&(words[i]->second_words));
         putchar('\n');
     }
 }
@@ -104,9 +107,10 @@ void free_array()
     
     for (i = 0; i < n_words; i++)
     {
-        free_sword(words[i].second_words.next); // 次の単語の線形リストを解放
-        free_list(words[i].indices.next);   // 転置索引の解放
-        free(words[i].word);                // 単語の領域の解放
+        free_tree(&(words[i]->second_words), &(words[i]->second_words)); // 次の単語の線形リストを解放
+        free_list(words[i]->indices.next);   // 転置索引の解放
+        free(words[i]->word);                // 単語の領域の解放
+        free(words[i]);
     }
     free(words);    // 配列の解放
 }
