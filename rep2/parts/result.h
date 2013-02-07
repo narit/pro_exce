@@ -1,12 +1,13 @@
-#ifndef _CALC_H_
-#define _CALS_H_
+#ifndef _RESULT_H_
+#define _RESULT_H_
 
 #include "array.h"
 
 /**
  *  共起の強度計算方式
  */
-typedef enum {
+typedef enum
+{
     /** Overlap係数 */
     CM_OVERLAP,
     /** ダイス係数 */
@@ -15,6 +16,10 @@ typedef enum {
     CM_TSCORE,
     /** 相互情報量(Mutual Information Score) */
     CM_MISCORE,
+    /** MI3スコア */
+    CM_MI3SCORE,
+    /** Zスコア */
+    CM_ZCORE,
     /** 要素数 */
     CM_NUM_MODE,
 } CALC_MODE;
@@ -37,8 +42,6 @@ extern ARRAY **words;       // 単語の列
 extern int n_words;         // 振ったID = 単語数
 extern int n_words_max;     // 最大数
 
-extern int threshold;       // 計算に用いる出現頻度の最小値
-
 /**
  *  結果を保存する関数
  *  @param char *word1
@@ -50,8 +53,9 @@ void insert_result(char *word1, char *word2, double indicator);
 /**
  *  強度を計算して保存する関数
  *  @param CALC_MODE mode 計算する方式
+ *  @param int threshold 計算に用いる出現頻度の最小値
  */
-void calc_indicator(CALC_MODE mode);
+void calc_indicator(CALC_MODE mode, int threshold);
 
 /**
  *  結果のソートを行う関数

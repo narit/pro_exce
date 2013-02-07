@@ -21,7 +21,7 @@ void set_character(char **str, char c, int *len, int *max)
         // メモリを再度割り当てる
         if ((tmp = (char *)realloc(*str, sizeof(char) * (*max))) == NULL)
         {
-            printf("Memory Reallocation Error\n");
+            fprintf(stderr, "Memory Reallocation Error\n");
             free(*str);
             exit(1);
         }

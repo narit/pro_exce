@@ -18,7 +18,7 @@ void insert_document(char *str)
         // メモリを再度割り当てる
         if ((tmp = (char **)realloc(document, sizeof(char *) * n_docs_max)) == NULL)
         {
-            printf("Memory Reallocation Error\n");
+            fprintf(stderr, "Memory Reallocation Error\n");
             free_document();
             exit(1);
         }
@@ -31,7 +31,7 @@ void insert_document(char *str)
     document[n_docs] = (char *)malloc(sizeof(char) * (strlen(str) + 1));
     if (document[n_docs] == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     // 文字列のコピー

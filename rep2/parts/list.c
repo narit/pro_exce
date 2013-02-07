@@ -27,7 +27,7 @@ int insert_list(INDEX *head, int id)
     new_ele = (INDEX *)malloc(sizeof(INDEX));
     if (new_ele == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     new_ele->id = id;

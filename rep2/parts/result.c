@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "calc.h"
+#include "result.h"
 
 /**
  *  結果を保存する関数
@@ -21,7 +21,7 @@ void insert_result(char *first, char *second, double indicator)
         // メモリを再度割り当てる
         if ((tmp = (RESULTS **)realloc(results, sizeof(RESULTS *) * n_results_max)) == NULL)
         {
-            printf("Memory Reallocation Error\n");
+            fprintf(stderr, "Memory Reallocation Error\n");
             free_results();
             exit(1);
         }
@@ -37,7 +37,7 @@ void insert_result(char *first, char *second, double indicator)
     results[n_results]->second = (char *)malloc(sizeof(char) * (strlen(second) + 1));
     if (results[n_results]->first == NULL || results[n_results]->second == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     
@@ -85,14 +85,14 @@ double calc_dice_score(ARRAY *ele1, ARRAY *ele2, TREE *conb)
  */
 double calc_t_score(ARRAY *ele1, ARRAY *ele2, TREE *conb)
 {
-    // tスコアの計算 [|S(a, b)| - (|S(a)| * |S(b)| / |S(all)|)] / sqrt(|S(a, b)|)
+    // tスコアの計算 [|S(a, b)| - (|S(a)| * |S(b)| / |S(all)|)] / √(|S(a, b)|)
     return ((double)conb->freq
             - (double)(ele1->freq * ele2->freq / n_words))
     / sqrt(conb->freq);
 }
 
 /**
- *  相互情報量の計算をする関数
+ *  相互情報量(MIスコア)の計算をする関数
  *  @param ARRAY *ele1 1つ目の単語の要素
  *  @param ARRAY *ele2 2つ目の単語の要素
  *  @param TREE *conb 2つの単語の要素
@@ -105,12 +105,47 @@ double calc_mi_score(ARRAY *ele1, ARRAY *ele2, TREE *conb)
 }
 
 /**
+ *  MI3スコアの計算をする関数
+ *  @param ARRAY *ele1 1つ目の単語の要素
+ *  @param ARRAY *ele2 2つ目の単語の要素
+ *  @param TREE *conb 2つの単語の要素
+ *  @return double 相互情報量
+ */
+double calc_mi3_score(ARRAY *ele1, ARRAY *ele2, TREE *conb)
+{
+    double conb_freq = (double)conb->freq;
+    // MI3スコアの計算 log2(|S(a, b)|^3 * |S(all)|) / (|S(a)| * |S(b)|)
+    return log((double)(conb_freq * conb_freq * conb_freq * n_words)
+               / (double)(ele1->freq * ele2->freq)) / log(2);
+}
+
+/**
+ *  Zスコアの計算をする関数
+ *  @param ARRAY *ele1 1つ目の単語の要素
+ *  @param ARRAY *ele2 2つ目の単語の要素
+ *  @param TREE *conb 2つの単語の要素
+ *  @return double 相互情報量
+ */
+double calc_z_score(ARRAY *ele1, ARRAY *ele2, TREE *conb)
+{
+    // 中心語が生起する以外の場所に，共起語が現れる確率p
+    double p = (double)ele2->freq / (double)(n_words - ele1->freq);
+    // 期待される共起の回数E
+    double E = p * ele1->freq;
+    
+    // Zスコアの計算 (|S(a, b)| - E) / √(E(1 - p))
+    return (double)(conb->freq - E) / sqrt(E * (1 - p));
+}
+
+
+/**
  *  強度を計算する再帰関数
  *  @param ARRARY *first 最初の単語が格納された要素
  *  @param TREE *conb 2つの単語の要素
- *  @param double *get_indicator(ARRAY *, ARRAY *, TREE *) 強度を返す関数
+ *  @param int threshold 計算に用いる出現頻度の最小値
+ *  @param double *get_indicator(ARRAY *, ARRAY *, TREE *) 強度を返す関数 
  */
-void calc_indicator_in_tree(ARRAY *first, TREE *conb,
+void calc_indicator_in_tree(ARRAY *first, TREE *conb, int threshold,
                             double (*get_indicator)(ARRAY *, ARRAY *, TREE *))
 {
     double indicator;
@@ -120,10 +155,10 @@ void calc_indicator_in_tree(ARRAY *first, TREE *conb,
         return ;
     
     if (conb->left != NULL)   // 右へ
-        calc_indicator_in_tree(first, conb->left, get_indicator);
+        calc_indicator_in_tree(first, conb->left,  threshold, get_indicator);
     
     if (conb->right != NULL)  // 右へ
-        calc_indicator_in_tree(first, conb->right, get_indicator);
+        calc_indicator_in_tree(first, conb->right, threshold, get_indicator);
     
     // 閾値よりも低い時は計算しない
     if (words[conb->id]->freq >= threshold)
@@ -137,8 +172,9 @@ void calc_indicator_in_tree(ARRAY *first, TREE *conb,
 /**
  *  強度を計算して保存する関数
  *  @param CALC_MODE mode 計算する方式
+ *  @param int threshold 計算に用いる出現頻度の最小値
  */
-void calc_indicator(CALC_MODE mode)
+void calc_indicator(CALC_MODE mode, int threshold)
 {
     // 計算方法
     static double (*calc_method[])(ARRAY *, ARRAY *, TREE *)
@@ -147,6 +183,8 @@ void calc_indicator(CALC_MODE mode)
         calc_dice_score,
         calc_t_score,
         calc_mi_score,
+        calc_mi3_score,
+        calc_z_score,
     };
     int i;
     
@@ -158,6 +196,7 @@ void calc_indicator(CALC_MODE mode)
         
         calc_indicator_in_tree(words[i],
                                &(words[i]->second_words),
+                               threshold,
                                calc_method[mode]);
     }
 }

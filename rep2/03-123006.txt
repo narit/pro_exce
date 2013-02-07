@@ -1,0 +1,183 @@
+作成者:
+	学籍番号: 03-123006
+	学年: 3年(工学部編入生)
+	氏名: 岩成達哉
+	
+コンパイル方法
+	gcc 03-123006.c
+
+実行方法
+	./a.out -f [filename]
+	[オプション]
+		-f [filename] filenameで指定した名前のファイルを対象とする
+
+共起の計算方法
+	いくつかの計算方法を実行できるようにした
+		Overlap係数
+			課題の説明pdfに記載されていたもの
+			|S(a, b)| / min(|S(a)|, |S(b)|)
+		ダイス係数
+			参考文献[3]より
+			単純な指標に共起頻度に対して中心語と共起語頻度の関係だけで計算する
+			 2 * |S(a, b)| / (|S(a)| + |S(b)|)
+		tスコア
+			参考文献[3]より
+			総単語数を考慮して，全体における個々の語の出現比率を比較する
+			[|S(a, b)| - (|S(a)| * |S(b)| / |S(all)|)] / √(|S(a, b)|)
+			2以上の場合に意味のある組み合わせであるとされる
+		相互情報量(MIスコア)
+			参考文献[3]より
+			ある語が共起相手の語の情報をどの程度持っているかを示す指標
+			log2(|S(a, b)| * |S(all)|) / (|S(a)| * |S(b)|)	
+		MI3スコア
+			参考文献[4][5]より
+			MIスコアの持つ，低頻度表現への偏りを改善したもの	
+			log2(|S(a, b)|^3 * |S(all)|) / (|S(a)| * |S(b)|)
+		Zスコア
+			参考文献[4][5]より
+			共起有意性とエフェクト・サイズを考慮する計算法
+			中心語が生起する以外の場所に，共起語が現れる確率pを
+			p = |S(b)| / (|S(all)| - |S(a)|)
+			期待される共起の回数Eを
+			E = p * |S(a)|
+			として
+    			(|S(a, b)| - E) / √(E(1 - p))
+
+計算した結果
+	共起を構成する単語の出現頻度が少ないものはそれぞれの指標が大きくなってしまう場合がある
+	そこで，閾値を超える出現頻度の単語についてのみ計算に利用するようにした
+	この閾値も任意に指定できる
+	以下は閾値(Treshold)を10にした(共起を構成する単語がどちらも10回以上出現したことを意味する)場合の
+	上位10項目について示した
+		Overlap係数
+			[    1]:                  new -                 york >   1.000000
+			[    2]:             american -              express >   1.000000
+			[    3]:                  the -               symbol >   1.000000
+			[    4]:                  pan -                   am >   0.941176
+			[    5]:              billion -              dollars >   0.937500
+			[    6]:                 part -                   of >   0.909091
+			[    7]:                   u. -                   s. >   0.909091
+			[    8]:                   in -              january >   0.866667
+			[    9]:               fiscal -             nineteen >   0.818182
+			[   10]:               fourth -              quarter >   0.800000
+		ダイス係数
+			[    1]:                  pan -                   am >   0.914286
+			[    2]:             nineteen -               eighty >   0.730337
+			[    3]:                 loan -          association >   0.666667
+			[    4]:                   u. -                   s. >   0.640000
+			[    5]:                began -              trading >   0.627451
+			[    6]:                   f. -                   m. >   0.615385
+			[    7]:              million -              dollars >   0.609589
+			[    8]:            executive -              officer >   0.562500
+			[    9]:               tender -                offer >   0.521739
+			[   10]:               fourth -              quarter >   0.484848
+		tスコア
+			[    1]:              million -              dollars >   8.903982
+			[    2]:             nineteen -               eighty >   7.938223
+			[    3]:                 said -                   it >   6.769823
+			[    4]:              billion -              dollars >   6.559133
+			[    5]:                   u. -                   s. >   6.324555
+			[    6]:                  one -              hundred >   6.099943
+			[    7]:                  one -                point >   5.692100
+			[    8]:                 will -                   be >   5.487955
+			[    9]:                point -                 five >   5.408987
+			[   10]:                 five -              million >   5.222330
+		相互情報量(MIスコア)
+			[    1]:                 loan -          association >   8.026347
+			[    2]:                  pan -                   am >   7.742964
+			[    3]:               tender -                offer >   7.562947
+			[    4]:             security -           assistance >   7.299912
+			[    5]:          convertible -           debentures >   7.277886
+			[    6]:                 long -                 term >   7.277886
+			[    7]:                  net -               income >   7.237851
+			[    8]:            executive -              officer >   7.221910
+			[    9]:               fourth -              quarter >   7.154862
+			[   10]:           debentures -                  due >   7.152355
+		MI3スコア
+			[    1]:             nineteen -               eighty >  17.116717
+			[    2]:              million -              dollars >  17.065335
+			[    3]:                   u. -                   s. >  16.166855
+			[    4]:                  pan -                   am >  15.742964
+			[    5]:              billion -              dollars >  15.551099
+			[    6]:                   of -                  the >  14.878415
+			[    7]:                 said -                   it >  14.724907
+			[    8]:                  new -                 york >  14.671288
+			[    9]:                began -              trading >  14.669435
+			[   10]:                  one -              hundred >  14.405030
+		Zスコア
+			[    1]:                  pan -                   am >  58.264225
+			[    2]:             nineteen -               eighty >  45.372635
+			[    3]:                 loan -          association >  42.561428
+			[    4]:                   u. -                   s. >  42.141425
+			[    5]:                began -              trading >  39.982789
+			[    6]:                   f. -                   m. >  39.216261
+			[    7]:              million -              dollars >  37.088178
+			[    8]:            executive -              officer >  36.381312
+			[    9]:             american -              express >  34.960969
+			[   10]:               fourth -              quarter >  33.580566
+
+考察
+	いくつかの指標で上位に共通して現れるものは
+	american express, million/billion dollars, ninety eightyなど，
+	であるが，感覚的に，日常で用いられる単語の組み合わせとしても違和感ない。
+	上記のように様々な指標の中で共通して見られる組み合わせが多いことから，
+	閾値を10にしたことで，ある程度精度のある結果が得られたと考えられる。
+	一方，これらの指標すべてに共通して10位以内に出てくる組み合わせはない。
+	したがって，それぞれの指標を見比べて吟味することが必要であるとわかる。
+	いくつもの指標を見比べることができるのは今回のプログラムの強みであるといえる。
+
+工夫した点
+	データ構造
+		1つ目の単語は動的配列によって表現した
+		2つ目の単語は2分木によって表現した
+		2つ目の単語は1つ目の単語の配列のindexを持つようにした
+		結果は動的配列で表現して，qsortを用いれるようにした
+		動的配列はreallocすることを考慮してポインタの配列とした
+	計算方法をいくつか設けた
+		Overlap係数
+ 		ダイス係数
+ 		tスコア
+ 		相互情報量
+		MI3スコア
+		Zスコア
+	計算に用いるかどうかの閾値を入力できるようにした
+	出力の範囲を指定できるようにした
+	CSV形式でファイルに主力できるようにした
+
+参考文献
+	[1]関数のリファレンス
+		「ライブラリ関数一覧」,
+		http://www9.plala.or.jp/sgwr-t/lib/libtop.html
+	
+	[2]クイックソート
+		「qsort」,
+		http://www.cc.kyoto-su.ac.jp/~yamada/ap/qsort.html
+	
+	[3]共起の強度の計算方法1
+			・Overlap係数
+ 			・ダイス係数
+ 			・tスコア
+ 			・相互情報量
+		「コロケーションの強度をどう測るか ―ダイス係数,t スコア,相互情報量を中心として―」，
+		http://language.sakura.ne.jp/s/ilaa/ishikawa_20080317.pdf
+	
+	[4]共起の強度の計算方法2
+			・MI3スコア
+			・Zスコア
+		「取得したKWICデータに対する統計を取る（Collocation）」，
+		http://en.sourceforge.jp/projects/chaki/wiki/%E5%8F%96%E5%BE%97%E3%81%97%E3%81%9FKWIC%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AB%E5%AF%BE%E3%81%99%E3%82%8B%E7%B5%B1%E8%A8%88%E3%82%92%E5%8F%96%E3%82%8B%EF%BC%88Collocation%EF%BC%89
+
+	[5]強度の計算方法の説明
+		「共起性の計算方法」
+		http://c-faculty.chuo-u.ac.jp/~rhotta/course/2009a/hellog/cat_collocation.html
+
+	[6]2分木への要素の
+			・挿入(insert_tree)
+			・表示(show_tree)
+			・削除(free_tree)[show_treeをもとに]
+		「C言語アルゴリズム-２分木」,
+		http://masudahp.web.fc2.com/cl/algo/btree01.html
+
+
+
+

@@ -33,7 +33,7 @@ int add_array(char *str, int doc_index)
         // メモリを再度割り当てる
         if ((tmp = (ARRAY **)realloc(words, sizeof(ARRAY *) * n_words_max)) == NULL)
         {
-            printf("Memory Reallocation Error\n");
+            fprintf(stderr, "Memory Reallocation Error\n");
             exit(1);
         }
         else
@@ -46,13 +46,13 @@ int add_array(char *str, int doc_index)
     words[n_words] = (ARRAY *)malloc(sizeof(ARRAY));
     if (words[n_words] == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     words[n_words]->word = (char *)malloc(sizeof(char) * (strlen(str) + 1));
     if (words[n_words]->word == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     // 文字列のコピー
@@ -67,8 +67,6 @@ int add_array(char *str, int doc_index)
     
     return n_words++; // 追加した位置を返す
 }
-
-
 
 /**
  *  2つの単語を関連付ける関数

@@ -31,7 +31,7 @@ int insert_tree(TREE *root, int cur_word_id, int doc_index)
     // 領域確保(新しい節を作成)
     if((new_ele = (TREE *)malloc(sizeof(TREE))) == NULL)
     {
-        printf("Memory Allocation Error\n");
+        fprintf(stderr, "Memory Allocation Error\n");
         exit(1);
     }
     
